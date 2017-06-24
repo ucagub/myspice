@@ -1,0 +1,4 @@
+# myspice
+
+Spice simulator attempt
+
