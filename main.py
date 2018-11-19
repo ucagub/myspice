@@ -8,4 +8,5 @@ for component in component_list:
     print(component.getNodes())
     print(component.getName())
     print(component.getModel())
-    print("\n")
+    #print("\n")
+

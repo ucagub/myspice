@@ -25,6 +25,7 @@ class node:
         self.num = num
         self.adj_node = None
         self.voltage = None
+        self.adj_edge = None
 
     def addAdjNode(self, adj_node):
         try:
@@ -34,6 +35,14 @@ class node:
 
     def getName(self):
         return self.name
+
+    def addAdjEdge(self, adj_edge):
+        try:
+            self.adj_edge = self.adj_edge + [adj_edge]
+        except TypeError:
+            self.adj_edge = [adj_edge]
+
+
 
 class edge:
     def __init__(self, node1, node2):
@@ -62,8 +71,8 @@ def read_netlist(file_name):
 
     def getType(name):
         """
-            input: name of component
-            return: the component type
+        input: name of component
+        return: the component type
         """
         first_letter = name.lower()[0]
         dict = {
@@ -72,8 +81,10 @@ def read_netlist(file_name):
             'l' : "Inductor",
             'n' : "NPN",
             'p' : "PNP",
-            'v' : "Voltage_Source"  #assume DC
+            'v' : "Voltage_Source",  #assume DC
+            'i' : "Current_Source"  #assume DC
         }
+
         if first_letter in dict:
             return dict[first_letter]
         else:
@@ -85,7 +96,7 @@ def read_netlist(file_name):
             input: cmp_info_array & component type
             return: the nodes in array format
         '''
-        if type in ("Resistor", "Capacitor", "Inductor", "Voltage_Source"):
+        if type in ("Resistor", "Capacitor", "Inductor", "Voltage_Source", "Current_Source"):
             return [int(cmp_info_array[1]), int(cmp_info_array[2])]
 
         elif type in ("NPN", "PNP"):
@@ -100,7 +111,7 @@ def read_netlist(file_name):
         '''
         if type in ("Resistor", "Capacitor", "Inductor"):
             return convValue(cmp_info_array[3])
-        elif type in ("NPN", "PNP", "Voltage_Source"):
+        elif type in ("NPN", "PNP", "Voltage_Source", "Current_Source"):
             return cmp_info_array[4]
 
 
@@ -165,4 +176,31 @@ def read_netlist(file_name):
 
 def DC_char(component_list):
     return
+
+class Graph:
+
+    def __int__(self, component_list):
+    """ Creates the graph
+        Input: component list
+        Output: graph of components
+    """
+        self.node_list = {}
+        self.nodeNums = [0]
+        for component in component_list:
+
+
+    def connectNode(self, component):
+        nodes = component.getNodes()
+
+        for nodeNum in nodes:
+            if not(nodeNum in self.nodeNums):
+                self.node_list[nodeNum] = node(nodeNum)
+
+            # assumung resistors and sources only
+            buffNode = self.node_list[nodeNum]
+            buffNode.addAdjEdge()
+
+
+
+
 
