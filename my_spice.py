@@ -1,3 +1,33 @@
+import numpy as np
+
+class Graph:
+
+    def __init__(self, component_list):
+        """ Creates the graph
+            Input: component list
+            Output: graph of components
+        """
+        self.node_list = {}
+        self.nodeNums = []
+        self.component_list = component_list
+        for component in component_list:
+            component.addComponent(self)
+
+
+    def connectNode(self, component):
+        nodes = component.getNodes()
+
+        for nodeNum in nodes:
+            if not(nodeNum in self.nodeNums):
+                self.node_list[nodeNum] = node(nodeNum)
+
+            # assumung resistors and sources only
+            buffNode = self.node_list[nodeNum]
+            buffNode.addAdjEdge()
+
+    def DCanalysis(self):
+        for node in
+
 '''component constructor'''
 class Component:
 
@@ -18,6 +48,50 @@ class Component:
 
     def getModel(self):
         return self.model
+
+class Resistor(Component):
+    def __init__(self, name, type, nodes, value):
+        Component.__init__(self, name, type, nodes, value)
+        self.value = value
+    def addComponent(self, graph):
+        nodes = self.nodes
+
+        for nodeNum in nodes:
+            if not(nodeNum in graph.nodeNums):
+                graph.node_list[nodeNum] = node(nodeNum)
+                graph.nodeNums = graph.nodeNums + [nodeNum]
+
+
+        # add node edges
+        buffNode0 = graph.node_list[nodes[0]]
+        buffEdge0t1 = edge([0, -1], [1/self.value, 1/self.value], "notIsource")
+        buffNode0.addAdjEdge(buffEdge0t1)
+
+        buffNode1 = graph.node_list[nodes[1]]
+        buffEdge1t0= edge([1, 0], [1/self.value, 1/self.value], "notIsource")
+        buffNode1.addAdjEdge(buffEdge1t0)
+
+class Isupply(Component):
+    def __init__(self, name, type, nodes, value):
+        ''' n independent current source whose current flows through the source from node n+ to node n-
+        '''
+        Component.__init__(self, name, type, nodes, value)
+        self.value = value
+
+    def addComponent(self, graph):
+        nodes = self.nodes
+        for nodeNum in nodes:
+            if not(nodeNum in graph.nodeNums):
+                graph.node_list[nodeNum] = node(nodeNum)
+
+        # add node edges
+        buffNode0 = graph.node_list[nodes[0]] #n+
+        buffEdge0t1 = edge([1], [self.value], "Isource")
+        buffNode0.addAdjEdge(buffEdge0t1)
+
+        buffNode1 = graph.node_list[nodes[1]] #n-
+        buffEdge1t0 = edge([-1], [self.value], "Isource")
+        buffNode1.addAdjEdge(buffEdge1t0)
 
 class node:
     def __init__(self, num):
@@ -45,9 +119,16 @@ class node:
 
 
 class edge:
-    def __init__(self, node1, node2):
-        self.begin = node1.num
-        self.end = node2.num
+    def __init__(self, VolVars, Vweights, type):
+        '''indicates the voltage waits; effectively the current'''
+
+        #node voltage dependence array
+        self.V = VolVars
+
+        #conductance array
+        self.G = Vweights
+
+        self.type = type
 
 
 
@@ -66,7 +147,13 @@ def read_netlist(file_name):
         type = getType(name)
         nodes = getNodes(cmp_info_array, type)
         model = getModel(cmp_info_array, type)
-        return Component(name, type, nodes, model)
+
+        component_types = {"Resistor" : Resistor,
+                           "Current_Source" : Isupply
+                           }
+        buffComp = component_types[type]
+
+        return buffComp(name, type, nodes, model)
 
 
     def getType(name):
@@ -177,28 +264,6 @@ def read_netlist(file_name):
 def DC_char(component_list):
     return
 
-class Graph:
-
-    def __int__(self, component_list):
-    """ Creates the graph
-        Input: component list
-        Output: graph of components
-    """
-        self.node_list = {}
-        self.nodeNums = [0]
-        for component in component_list:
-
-
-    def connectNode(self, component):
-        nodes = component.getNodes()
-
-        for nodeNum in nodes:
-            if not(nodeNum in self.nodeNums):
-                self.node_list[nodeNum] = node(nodeNum)
-
-            # assumung resistors and sources only
-            buffNode = self.node_list[nodeNum]
-            buffNode.addAdjEdge()
 
 
 
